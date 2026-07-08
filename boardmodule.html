@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brainstorming Board Overview - Virtual Sticky Note Platform</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background-image: url('images/your-background.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: lightblue;
+    color:#333;
+}
+
+header{
+    background:#0d47a1;
+    color:white;
+    padding:20px 50px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h2{
+    font-size:28px;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:bold;
+}
+
+.hero{
+    background: transparent;
+    text-align:center;
+    padding: 40px 20px 20px 20px;
+}
+
+/* REMOVED BLACK BOX & SHADOWS */
+.hero-text-container {
+    background: transparent; 
+    max-width: 850px;
+    margin: 15px auto 0 auto;
+    padding: 10px;
+    border-radius: 0;
+    backdrop-filter: none; 
+    box-shadow: none;
+}
+
+/* CHANGED TO VISIBLE DARK BLUE */
+.hero h1{
+    font-size: 40px; 
+    margin-bottom: 12px;
+    color: #0d47a1; 
+    text-shadow: none;
+}
+
+/* CHANGED TO READABLE CHARCOAL */
+.hero p{
+    font-size: 19px; 
+    max-width: 780px;
+    margin: auto;
+    color: #333333; 
+    line-height: 1.6;
+}
+
+.hero-image{
+    width:220px;
+    max-width:100%;
+    border-radius:15px;
+    margin-bottom:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:20px auto 40px auto;
+}
+
+.section{
+    background: rgba(255, 255, 255, 0.95);
+    padding:30px;
+    border-radius:12px;
+    margin-bottom:30px;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
+    backdrop-filter: blur(5px);
+}
+
+.section h2{
+    color:#1565c0;
+    margin-bottom:15px;
+}
+
+.section p{
+    line-height:1.8;
+    text-align:justify;
+    margin-bottom: 15px;
+}
+
+/* 2X2 GRID SYSTEM FOR BOARD PROPERTIES */
+.resp-grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.resp-card {
+    background:#f4f9f4;
+    border: 1px solid #e2edff;
+    border-left: 5px solid #00796b; /* CHANGED BLUE TO TEAL */
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    box-shadow: 0 4px 10px rgba(0, 121, 107, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resp-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 121, 107, 0.08);
+}
+
+.resp-card-icon {
+    font-size: 28px;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.resp-card-content h3 {
+    color: #0d47a1;
+    font-size: 17px;
+    margin-bottom: 6px;
+}
+
+.resp-card-content p {
+    font-size: 14px;
+    color: #555;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.card{
+    background:#f4f9f4;
+    border-left:6px solid #00796b; /* CHANGED BLUE TO TEAL */
+    padding:20px;
+    border-radius:10px;
+}
+
+.card h3{
+    margin-bottom:10px;
+    color:#0d47a1;
+    font-size: 18px;
+}
+
+/* STRATEGIC IMPORTANCE STYLING & SIDE-BY-SIDE LAYOUT */
+.importance-container {
+    background: #f4f9f4;
+    border-left: 6px solid #00796b; /* CHANGED BLUE TO TEAL */
+    padding: 25px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.importance-container h3 {
+    color: #0d47a1;
+    font-size: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.importance-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+}
+
+.importance-text {
+    flex: 1.6;
+}
+
+.importance-list {
+    list-style-type: none;
+}
+
+.importance-list li {
+    margin-bottom: 15px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.importance-list li:last-child {
+    margin-bottom: 0;
+}
+
+.importance-list li strong {
+    color: #0d47a1;
+    font-size: 16px;
+    display: inline-block;
+    margin-bottom: 2px;
+}
+
+.importance-image {
+    flex: 1;
+    text-align: center;
+}
+
+.importance-image img {
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.buttons{
+    text-align:center;
+    margin:40px 0;
+}
+
+.buttons button{
+    padding:15px 35px;
+    border:none;
+    border-radius:8px;
+    font-size:18px;
+    cursor:pointer;
+    margin:10px;
+    transition: background 0.2s ease;
+}
+
+.crud{
+    background:#1565c0;
+    color:white;
+}
+
+.crud:hover {
+    background:#0d47a1;
+}
+
+.dashboard{
+    background:#666;
+    color:white;
+}
+
+.dashboard:hover {
+    background:#555;
+}
+
+footer{
+    background:#0d47a1;
+    color:white;
+    text-align:center;
+    padding:25px;
+    margin-top:40px;
+}
+
+footer p{
+    margin:8px;
+}
+
+@media(max-width: 768px) {
+    .resp-grid-container {
+        grid-template-columns: 1fr;
+    }
+    .importance-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .importance-image {
+        margin-top: 20px;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+    <h2>📝 Virtual Sticky Note Platform</h2>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <img src="images/Board.jpeg" alt="Brainstorming Board Banner" class="hero-image">
+    <div class="hero-text-container">
+        <h1>📋 Brainstorming Board Module</h1>
+        <p>
+            The Brainstorming Board acts as the collective digital canvas where teams map out logic, organize strategies, and host collaborative sticky note configurations.
+        </p>
+    </div>
+</section>
+
+<div class="container">
+
+    <!-- About Section -->
+    <div class="section">
+        <h2>About Brainstorming Boards</h2>
+        <p>
+            A Brainstorming Board is a centralized hub tailored for collaborative ideation sessions. Each board functions as an isolated structural sandbox assigned to a specific App User (The Owner). Within these spaces, users can instantiate dedicated themes, structure workflows, link real-time sticky data blocks, and map complex operational relational nodes securely.
+        </p>
+    </div>
+
+    <!-- Core Responsibilities of a Board -->
+    <div class="section">
+        <h2>Core Responsibilities</h2>
+        <div class="resp-grid-container">
+            <!-- Row 1: Item 1 -->
+            <div class="resp-card">
+                <div class="resp-card-icon">🏗️</div>
+                <div class="resp-card-content">
+                    <h3>1. Workspace Structuring</h3>
+                    <p>Creates isolated contextual boards with customizable titles, tags, and ownership mappings.</p>
+                </div>
+            </div>
+
+            <!-- Row 1: Item 2 -->
+            <div class="resp-card">
+                <div class="resp-card-icon">⏱️</div>
+                <div class="resp-card-content">
+                    <h3>2. Real-Time Syncing</h3>
+                    <p>Coordinates incoming sticky note state updates and layout parameters across all team sessions instantly.</p>
+                </div>
+            </div>
+
+            <!-- Row 2: Item 3 -->
+            <div class="resp-card">
+                <div class="resp-card-icon">🛡️</div>
+                <div class="resp-card-content">
+                    <h3>3. Access Boundaries</h3>
+                    <p>Enforces dynamic permission scopes to shield shared canvas layers from uninvited modifications.</p>
+                </div>
+            </div>
+
+            <!-- Row 2: Item 4 -->
+            <div class="resp-card">
+                <div class="resp-card-icon">📊</div>
+                <div class="resp-card-content">
+                    <h3>4. Telemetry Tracking</h3>
+                    <p>Tethers action workflows right down to precise board activity sequences for deep compliance logs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOX 1: Workspace Mechanics & Collaboration Features -->
+    <div class="section">
+        <h2>Workspace Mechanics & Collaboration Features</h2>
+        <p>The system orchestrates automated rendering engine properties and validation gates to preserve board state consistency:</p>
+        
+        <div class="cards">
+            <div class="card">
+                <h3>🎨 Structural Subspaces</h3>
+                <p>Boards automatically adapt to contain multi-lane columns, canvas grid systems, or open mind-mapping configurations to fit distinct agile frameworks.</p>
+            </div>
+            <div class="card">
+                <h3>🔗 Relational Mapping</h3>
+                <p>Establishes deep structural connections with Board Members and Sticky Notes modules to enforce access rules smoothly across runtime pipelines.</p>
+            </div>
+            <div class="card">
+                <h3>🚀 Live State Sync</h3>
+                <p>Leverages ultra-light structural payloads to project continuous visual canvas geometric alterations without forcing full manual browser tab updates.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOX 2: Strategic Importance Section -->
+    <div class="section">
+        <h2>Strategic Value & Planning</h2>
+        <p>Integrating clear visual components directly translates layout clarity into high-level team acceleration:</p>
+
+        <div class="importance-container">
+            <h3>💡 Strategic Importance of Brainstorming Boards</h3>
+            
+            <div class="importance-wrapper">
+                <!-- Left: Strategy Content -->
+                <div class="importance-text">
+                    <ul class="importance-list">
+                        <li>
+                            <strong>1. Eliminating Operational Silos</strong><br>
+                            Brainstorming boards act as a central architectural bridge that links users, individual notes, and team roles together. By keeping all project data unified under one canvas, it prevents information from becoming scattered across disconnected platforms.
+                        </li>
+                        <li>
+                            <strong>2. Accelerating Project Discovery</strong><br>
+                            Raw, chaotic team thoughts can quickly derail productivity. Brainstorming boards turn these unstructured ideas into visually indexed spatial elements, significantly slashing product design lifecycle timelines.
+                        </li>
+                        <li>
+                            <strong>3. Fostering Enterprise Alignment</strong><br>
+                            Enforcing consistent layout access parameters gives distributed global workforces a single, secure source of truth to collaborate simultaneously with absolute structural transparency.
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Right: Strategy Image -->
+                <div class="importance-image">
+                    <img src="images/Strategies.jpeg" alt="Brainstorming Strategy">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Navigation Layout -->
+    <div class="buttons">
+        <button class="crud" onclick="location.href='board.html'">
+            Proceed to Board CRUD Operations
+        </button>
+        <button class="dashboard" onclick="location.href='dashboard.html'">
+            Back to Dashboard
+        </button>
+    </div>
+
+</div>
+
+<footer>
+    <h2>Virtual Sticky Note Brainstorming Platform</h2>
+    <p>Efficient Collaboration • Creative Brainstorming • Organized Ideas</p>
+    <p>© 2026 Virtual Sticky Note Platform. All Rights Reserved.</p>
+</footer>
+
+</body>
+</html>

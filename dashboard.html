@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header styling matching the image */
+        header {
+            background: #114285;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        header h1 i {
+            background: #ffeb3b;
+            color: #333;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-welcome {
+            font-size: 17px;
+            color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        #loggedEmail {
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            border-right: 1px solid rgba(255, 255, 255, 0.4);
+            padding-right: 15px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        /* Dashboard Container */
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        h2 {
+            color: #0d3875;
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i {
+            font-size: 24px;
+            color: #0d3875;
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: #6da2df;
+            margin-top: 8px;
+            border-radius: 2px;
+        }
+
+        /* Sticky Notes Grid Layout - Configured for 3 on top, 2 on bottom */
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px 30px;
+            padding-top: 10px;
+            max-width: 840px; /* Limits width to exactly fit 3 cards + gaps */
+            margin: 0 auto;   /* Centers the entire grid container */
+        }
+
+        /* Individual Sticky Note Card */
+        .sticky-note {
+            position: relative;
+            width: 260px;
+            height: 280px;
+            padding: 35px 20px 20px 20px;
+            border-radius: 0 0 0 0;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Page Curl / Folded Corner Effect via SVG backgrounds */
+        .sticky-note::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.02) 56%, transparent 56%);
+            pointer-events: none;
+        }
+
+        .sticky-note:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.12);
+        }
+
+        /* Colored Tapes on Top */
+        .tape {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 22px;
+            opacity: 0.75;
+        }
+
+        /* Custom Colors and Tape Styles for each module type */
+        .note-yellow { background: #fff1b8; border-bottom-right-radius: 35px 12px; }
+        .note-yellow .tape { background: #ffcc00; }
+        .note-yellow::after { background: linear-gradient(135deg, transparent 50%, #e6d38e 50%); border-bottom-right-radius: 12px; }
+
+        .note-green { background: #e2f3cd; border-bottom-right-radius: 35px 12px; }
+        .note-green .tape { background: #8bc34a; }
+        .note-green::after { background: linear-gradient(135deg, transparent 50%, #bcd6a0 50%); border-bottom-right-radius: 12px; }
+
+        .note-pink { background: #fce4ec; border-bottom-right-radius: 35px 12px; }
+        .note-pink .tape { background: #f48fb1; }
+        .note-pink::after { background: linear-gradient(135deg, transparent 50%, #e1bcc7 50%); border-bottom-right-radius: 12px; }
+
+        .note-blue { background: #e3f2fd; border-bottom-right-radius: 35px 12px; }
+        .note-blue .tape { background: #64b5f6; }
+        .note-blue::after { background: linear-gradient(135deg, transparent 50%, #bdcfde 50%); border-bottom-right-radius: 12px; }
+
+        .note-purple { background: #f3e5f5; border-bottom-right-radius: 35px 12px; }
+        .note-purple .tape { background: #ba68c8; }
+        .note-purple::after { background: linear-gradient(135deg, transparent 50%, #d5bcd9 50%); border-bottom-right-radius: 12px; }
+
+        /* Sticky Note Contents */
+        .note-icon {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+        
+        .note-yellow .note-icon { color: #1565c0; }
+        .note-green .note-icon { color: #ec407a; }
+        .note-pink .note-icon { color: #f57c00; }
+        .note-blue .note-icon { color: #37474f; }
+        .note-purple .note-icon { color: #2e7d32; }
+
+        .note-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .divider {
+            width: 100%;
+            border-top: 1px dashed rgba(0, 0, 0, 0.18);
+            margin-bottom: 15px;
+        }
+
+        .note-desc {
+            font-size: 17px;
+            color: #555;
+            line-height: 1.5;
+            padding: 0 5px;
+        }
+
+        /* Footer styling */
+        footer {
+            background: #114285;
+            color: #e0e0e0;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 16px;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        footer a {
+            color: #ffeb3b;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1><i class="fa-solid fa-thumbtack"></i> Dashboard</h1>
+    <div class="user-info">
+        <span class="user-welcome">Welcome, <span id="loggedEmail">Loading...</span></span>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</header>
+
+<div class="container">
+
+    <h2><i class="fa-solid fa-cubes"></i> Project Modules</h2>
+
+    <div class="grid">
+
+        <div class="sticky-note note-yellow" onclick="location.href='usermodule.html'">
+            <div class="tape"></div>
+            <div class="note-icon"><i class="fa-solid fa-user"></i></div>
+            <div class="note-title">AppUser</div>
+            <div class="divider"></div>
+            <div class="note-desc">Manage application users, roles, and account information.</div>
+        </div>
+
+        <div class="sticky-note note-green" onclick="location.href='boardmodule.html'">
+            <div class="tape"></div>
+            <div class="note-icon"><i class="fa-solid fa-brain"></i></div>
+            <div class="note-title">Brainstorming Board</div>
+            <div class="divider"></div>
+            <div class="note-desc">Create and manage brainstorming boards for effective collaboration.</div>
+        </div>
+
+        <div class="sticky-note note-pink" onclick="location.href='stickynotemodule.html'">
+            <div class="tape"></div>
+            <div class="note-icon"><i class="fa-solid fa-note-sticky"></i></div>
+            <div class="note-title">Sticky Note</div>
+            <div class="divider"></div>
+            <div class="note-desc">Add, edit, move and organize sticky notes on boards.</div>
+        </div>
+
+        <div class="sticky-note note-blue" onclick="location.href='membermodule.html'">
+            <div class="tape"></div>
+            <div class="note-icon"><i class="fa-solid fa-users"></i></div>
+            <div class="note-title">Board Member</div>
+            <div class="divider"></div>
+            <div class="note-desc">Manage board members, permissions and their participation.</div>
+        </div>
+
+        <div class="sticky-note note-purple" onclick="location.href='activitymodule.html'">
+            <div class="tape"></div>
+            <div class="note-icon"><i class="fa-solid fa-chart-bar"></i></div>
+            <div class="note-title">Board Activity</div>
+            <div class="divider"></div>
+            <div class="note-desc">Track activities, changes and collaboration history on boards.</div>
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 Brainstorming Dashboard. All rights reserved. | <a href="#">Terms of Service</a></p>
+</footer>
+
+<script>
+const token = localStorage.getItem("token");
+
+if(!token){
+    window.location.href="login.html";
+}
+
+/* Reads the email from JWT payload. */
+function getEmailFromToken(token){
+    try{
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.sub || payload.email || "User";
+    }
+    catch{
+        return "User";
+    }
+}
+
+document.getElementById("loggedEmail").innerText = getEmailFromToken(token);
+
+function logout(){
+    localStorage.removeItem("token");
+    alert("Logged Out Successfully");
+    window.location.href="login.html";
+}
+</script>
+
+</body>
+</html>

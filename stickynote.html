@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Board Operations Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            min-height: 100vh;
+        }
+
+        /* Header Style */
+        header {
+            background: #114285;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        header h1 i {
+            background: #ffeb3b;
+            color: #333;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-welcome {
+            font-size: 15px;
+            color: #e0e0e0;
+        }
+
+        #loggedEmail {
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            border-right: 1px solid rgba(255, 255, 255, 0.4);
+            padding-right: 15px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Container Layout */
+        .container {
+            width: 96%;
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: #0d3875;
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 70px;
+            height: 3px;
+            background-color: #6da2df;
+            margin-top: 10px;
+            border-radius: 2px;
+        }
+
+        /* Single continuous row layout for top operation controllers */
+        .modules-block {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 40px;
+            flex-wrap: nowrap;
+        }
+
+        /* Sleek horizontal selection button architecture - INCREASED SIZE */
+        .small-btn {
+            flex: 1;
+            min-width: 0;
+            padding: 22px 12px; /* Increased top/bottom padding */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .small-btn:hover, .small-btn.active-tab {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            outline: 2px solid #114285;
+        }
+
+        /* Theme Styling */
+        .note-yellow { background: #fef0be; }
+        .note-green { background: #e0f4cb; }
+        .note-pink { background: #fcdbdc; }
+        .note-blue { background: #daf0fd; }
+        .note-purple { background: #f1dbf7; }
+        .note-orange { background: #ffeacc; }
+
+        .note-icon { font-size: 20px; display: flex; align-items: center; } /* Increased icon size */
+        .note-yellow .note-icon { color: #2e66b3; }
+        .note-green .note-icon { color: #e14d85; }
+        .note-pink .note-icon { color: #e67e22; }
+        .note-blue .note-icon { color: #435a6f; }
+        .note-purple .note-icon { color: #27ae60; }
+        .note-orange .note-icon { color: #d35400; }
+
+        .note-title { font-size: 19px; font-weight: 700; color: #202020; white-space: nowrap; } /* Increased text size */
+
+        /* Dynamic Active Panels Setup */
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #114285;
+            border-bottom: 2px solid #6da2df;
+            padding-bottom: 8px;
+        }
+
+        /* Form Controls Formatting */
+        .form-group {
+            margin-bottom: 15px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #114285;
+        }
+
+        .submit-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            background-color: #114285;
+            transition: background 0.2s;
+            margin-right: 5px;
+        }
+
+        .submit-btn:hover {
+            background-color: #0d3266;
+        }
+
+        /* Response Reporting Components */
+        .response-box {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 14px;
+            color: #333;
+            display: none;
+            text-align: left;
+        }
+
+        .response-box.show { display: block; }
+        .response-box.success { border-left: 5px solid #27ae60; }
+        .response-box.error { border-left: 5px solid #e74c3c; color: #c0392b; }
+
+        /* Tabular Layout Config */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        th {
+            background-color: #114285;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        tr:hover td { background-color: #f5f5f5; }
+
+        .back-btn {
+            background: #114285;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover { background: #0d3266; }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1><i class="fa-solid fa-brain"></i> Dashboard</h1>
+    <div class="user-info">
+        <span class="user-welcome">Welcome, <span id="loggedEmail">Loading...</span></span>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</header>
+
+<div class="container">
+
+    <h2><i class="fa-solid fa-clipboard-list"></i> Board Operations</h2>
+
+    <div class="modules-block">
+         <div class="small-btn note-pink" id="tab-post" onclick="showPanel('panel-add', 'tab-post')">
+            <div class="note-icon"><i class="fa-solid fa-square-plus"></i></div>
+            <div class="note-title">Post Board</div>
+        </div>
+        
+        <div class="small-btn note-yellow" id="tab-getall" onclick="showPanel('panel-getall', 'tab-getall')">
+            <div class="note-icon"><i class="fa-solid fa-table-cells-large"></i></div>
+            <div class="note-title">Get All Boards</div>
+        </div>
+        <div class="small-btn note-green" id="tab-getid" onclick="showPanel('panel-getbyid', 'tab-getid')">
+            <div class="note-icon"><i class="fa-solid fa-id-card"></i></div>
+            <div class="note-title">Get Board By Id</div>
+        </div>
+       
+        <div class="small-btn note-blue" id="tab-put" onclick="showPanel('panel-update', 'tab-put')">
+            <div class="note-icon"><i class="fa-solid fa-square-check"></i></div>
+            <div class="note-title">Put Board</div>
+        </div>
+        <div class="small-btn note-purple" id="tab-patch" onclick="showPanel('panel-patch', 'tab-purple')">
+            <div class="note-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+            <div class="note-title">Patch Board</div>
+        </div>
+        <div class="small-btn note-orange" id="tab-delete" onclick="showPanel('panel-delete', 'tab-delete')">
+            <div class="note-icon"><i class="fa-solid fa-trash-can"></i></div>
+            <div class="note-title">Delete Board</div>
+        </div>
+    </div>
+
+    <div class="panel" id="panel-getall">
+        <h3>All Registered Boards</h3>
+        <button class="submit-btn" onclick="fetchAllBoards()">Fetch All Boards</button>
+        <div class="response-box" id="res-getall"></div>
+    </div>
+
+    <div class="panel" id="panel-getbyid">
+        <h3>Retrieve Board By ID</h3>
+        <div class="form-group">
+            <label>Board ID</label>
+            <input type="number" id="getid-id" placeholder="e.g., 5" />
+        </div>
+        <button class="submit-btn" onclick="fetchBoardById()">Fetch Board Dataset</button>
+        <div class="response-box" id="res-getbyid"></div>
+    </div>
+
+    <div class="panel" id="panel-add">
+        <h3>Create New Board Record</h3>
+        <div class="form-group">
+            <label>Title <span style="color:#e74c3c;">*</span></label>
+            <input type="text" id="add-title" placeholder="Enter board title" />
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea id="add-description" placeholder="Enter board description context"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Max Note Capacity <span style="color:#e74c3c;">*</span></label>
+            <input type="number" id="add-maxCapacity" placeholder="e.g., 50" />
+        </div>
+        <div class="form-group">
+            <label>Current Note Count</label>
+            <input type="number" id="add-currentCount" value="0" placeholder="Initial live tally (Default: 0)" />
+        </div>
+        <div class="form-group">
+            <label>Created At Timestamp</label>
+            <input type="datetime-local" id="add-createdAt" />
+        </div>
+        <button class="submit-btn" onclick="addBoard()">Register Record Dataset</button>
+        <div class="response-box" id="res-add"></div>
+    </div>
+
+    <div class="panel" id="panel-update">
+        <h3>Put Board (Complete Update)</h3>
+        <div class="form-group">
+            <label>Target Board ID Reference <span style="color:#e74c3c;">*</span></label>
+            <input type="number" id="upd-id" placeholder="e.g., 5" />
+        </div>
+        <div class="form-group">
+            <label>Replace Title <span style="color:#e74c3c;">*</span></label>
+            <input type="text" id="upd-title" placeholder="Updated title mapping" />
+        </div>
+        <div class="form-group">
+            <label>Replace Description</label>
+            <textarea id="upd-description" placeholder="Updated description summary"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Replace Max Note Capacity <span style="color:#e74c3c;">*</span></label>
+            <input type="number" id="upd-maxCapacity" placeholder="Updated limit capacity integer" />
+        </div>
+        <div class="form-group">
+            <label>Replace Current Note Count <span style="color:#e74c3c;">*</span></label>
+            <input type="number" id="upd-currentCount" placeholder="Updated element index count" />
+        </div>
+        <div class="form-group">
+            <label>Replace Created At Timestamp <span style="color:#e74c3c;">*</span></label>
+            <input type="datetime-local" id="upd-createdAt" />
+        </div>
+        <button class="submit-btn" onclick="putBoard()">Execute Complete Modification</button>
+        <div class="response-box" id="res-update"></div>
+    </div>
+
+    <div class="panel" id="panel-patch">
+        <h3>Patch Board Field (Selective Modification)</h3>
+        <p style="font-size:12px; color:#666; margin-bottom:15px;">* Update selective board properties dynamically. Blank fields will be ignored by the backend.</p>
+        <div class="form-group">
+            <label>Target Board ID Reference <span style="color:#e74c3c;">*</span></label>
+            <input type="number" id="patch-id" placeholder="e.g., 5" />
+        </div>
+        <div class="form-group">
+            <label>Mutate Title (Optional)</label>
+            <input type="text" id="patch-title" placeholder="Enter new title" />
+        </div>
+        <div class="form-group">
+            <label>Mutate Description (Optional)</label>
+            <textarea id="patch-description" placeholder="Enter new description content"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Mutate Max Note Capacity (Optional)</label>
+            <input type="number" id="patch-maxCapacity" placeholder="Enter new maximum threshold" />
+        </div>
+        <div class="form-group">
+            <label>Mutate Current Note Count (Optional)</label>
+            <input type="number" id="patch-currentCount" placeholder="Enter adjusted live tally" />
+        </div>
+        <div class="form-group">
+            <label>Mutate Created At Timestamp (Optional)</label>
+            <input type="datetime-local" id="patch-createdAt" />
+        </div>
+        <button class="submit-btn" onclick="patchBoard()">Execute Partial Patch Modification</button>
+        <div class="response-box" id="res-patch"></div>
+    </div>
+
+    <div class="panel" id="panel-delete">
+        <h3>Purge Board Index Record</h3>
+        <div class="form-group">
+            <label>Target Board ID Reference</label>
+            <input type="number" id="del-id" placeholder="e.g., 5" />
+        </div>
+        <button class="submit-btn" style="background-color:#e74c3c;" onclick="confirmDelete()">Purge Board Profile</button>
+        
+        <div id="delete-confirm-box" style="display:none; margin-top:15px; padding:15px; background:#fff3cd; border:2px dashed #e74c3c; border-radius:5px;">
+            <strong style="color:#e74c3c;"><i class="fa-solid fa-triangle-exclamation"></i> Critical Operation warning:</strong> Confirm permanent deletion?
+            <br><br>
+            <button onclick="doDelete()" style="background:#e74c3c;color:white;border:none;padding:8px 18px;border-radius:4px;cursor:pointer;font-weight:bold;">Yes, Confirm Purge</button>
+            <button onclick="cancelDelete()" style="background:#888;color:white;border:none;padding:8px 18px;border-radius:4px;cursor:pointer;margin-left:8px;">Cancel Action</button>
+        </div>
+        <div class="response-box" id="res-delete"></div>
+    </div>
+
+    <button class="back-btn" onclick="location.href='dashboard.html'">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </button>
+
+</div>
+
+<script>
+const API = 'https://knotbackend-1.onrender.com';
+
+const token = localStorage.getItem("token");
+if(!token){
+    window.location.href="login.html";
+}
+
+function getEmailFromToken(token){
+    try{
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.sub || payload.email || "User";
+    }
+    catch{
+        return "User";
+    }
+}
+document.getElementById("loggedEmail").innerText = getEmailFromToken(token);
+
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+
+function confirmDelete() {
+    const id = document.getElementById('del-id').value.trim();
+    if (!id) {
+        showResponse('res-delete', '⚠️ Execution halt: valid board ID mapping missing.', true);
+        return;
+    }
+    document.getElementById('delete-confirm-box').style.display = 'block';
+}
+
+function cancelDelete() {
+    document.getElementById('delete-confirm-box').style.display = 'none';
+}
+
+function showPanel(panelId, tabId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.small-btn').forEach(t => t.classList.remove('active-tab'));
+    
+    document.getElementById(panelId).classList.add('active');
+    document.getElementById(tabId).classList.add('active-tab');
+}
+
+const nowISO = new Date().toISOString().slice(0, 16);
+document.getElementById('add-createdAt').value = nowISO;
+document.getElementById('upd-createdAt').value = nowISO;
+
+function authHeaders(extraHeaders) {
+    return Object.assign({ 'Authorization': 'Bearer ' + token }, extraHeaders || {});
+}
+
+function showResponse(boxId, content, isError) {
+    const box = document.getElementById(boxId);
+    box.className = 'response-box show ' + (isError ? 'error' : 'success');
+    box.innerHTML = content;
+}
+
+async function handleApiError(res, boxId) {
+    if (res.status === 401) {
+        alert('Session expired or authentication failed. Returning to login...');
+        localStorage.removeItem("token");
+        window.location.href = 'login.html';
+        return true;
+    }
+    if (res.status === 403) {
+        alert('Access Denied!\n\nYou do not have permissions to execute this endpoint.');
+        showResponse(boxId, '<strong>Access Denied</strong> - Role-based authorization verification failed.', true);
+        return true;
+    }
+    return false;
+}
+
+function boardCard(board) {
+    const id = board.id || '';
+    const title = board.title || '';
+    const maxCap = board.maxNoteCapacity || board.maxNotecapacity || 0;
+    const currentCount = board.currentNoteCount ?? board.currentnotecount ?? 0;
+    const dateStr = board.createdAt ? new Date(board.createdAt).toLocaleString() : 'N/A';
+
+    return `
+        <div style="display: flex; flex-direction: column; gap: 8px; line-height: 1.5;">
+            <div><strong>ID Reference:</strong> ${id}</div>
+            <div><strong>Title:</strong> ${title}</div>
+            <div><strong>Max Note Capacity:</strong> ${maxCap}</div>
+            <div><strong>Current Count:</strong> ${currentCount}</div>
+            <div><strong>Created At:</strong> ${dateStr}</div>
+        </div>
+    `;
+}
+
+async function fetchAllBoards() {
+    const boxId = 'res-getall';
+    showResponse(boxId, 'Processing data retrieval mapping...', false);
+    try {
+        const res = await fetch(API + '/Board/getData', { headers: authHeaders() });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showResponse(boxId, 'Error processing entity query loop: ' + (data.message || res.statusText), true);
+            return;
+        }
+        const data = await res.json();
+        
+        if (!data || data.length === 0) {
+            showResponse(boxId, '<em>No matches found inside targeted database table.</em>', false);
+            return;
+        }
+        
+        let rows = data.map(b => {
+            const maxCap = b.maxNoteCapacity || b.maxNotecapacity || 0;
+            const currentCount = b.currentNoteCount ?? b.currentnotecount ?? 0;
+            return `
+            <tr>
+                <td><strong>${b.id}</strong></td>
+                <td>${b.title}</td>
+                <td>${b.description || ''}</td>
+                <td>${maxCap}</td>
+                <td>${currentCount}</td>
+                <td>${b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A'}</td>
+            </tr>`;
+        }).join('');
+        const tableHtml = `<table>
+                    <thead>
+                        <tr><th>Board ID</th><th>Title</th><th>Description</th><th>Max Capacity</th><th>Current Count</th><th>Created At</th></tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+        showResponse(boxId, tableHtml, false);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error. Ensure resource server is running.', true);
+    }
+}
+
+async function fetchBoardById() {
+    const boxId = 'res-getbyid';
+    const id = document.getElementById('getid-id').value.trim();
+    if (!id) {
+        showResponse(boxId, '⚠️ Execution halt: valid board ID mapping missing.', true);
+        return;
+    }
+    try {
+        const res = await fetch(API + '/Board/getData/' + id, { headers: authHeaders() });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showResponse(boxId, 'Resource handling fault error: ' + (data.message || res.statusText), true);
+            return;
+        }
+        const data = await res.json();
+        showResponse(boxId, 'Board data matched successfully:<br><br>' + boardCard(data) + `<br><strong>Description:</strong> ${data.description || 'No description provided.'}`, false);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+
+async function addBoard() {
+    const boxId = 'res-add';
+    const title = document.getElementById('add-title').value.trim();
+    const description = document.getElementById('add-description').value.trim();
+    const maxNoteCapacity = document.getElementById('add-maxCapacity').value.trim();
+    const currentNoteCount = document.getElementById('add-currentCount').value.trim();
+    const createdAt = document.getElementById('add-createdAt').value;
+
+    if (!title || !maxNoteCapacity) {
+        showResponse(boxId, '⚠️ Verification failure: Title and Max Note Capacity must be filled.', true);
+        return;
+    }
+
+    const payload = {
+        title,
+        description,
+        maxNoteCapacity: parseInt(maxNoteCapacity),
+        currentNoteCount: currentNoteCount !== "" ? parseInt(currentNoteCount) : 0
+    };
+
+    if (createdAt) {
+        payload.createdAt = new Date(createdAt).toISOString();
+    }
+
+    try {
+        const res = await fetch(API + '/Board/postData', {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(payload)
+        });
+        if (await handleApiError(res, boxId)) return;
+        const data = await res.json();
+        if (!res.ok) {
+            showResponse(boxId, 'Constraint validation failure: ' + (data.message || res.statusText), true);
+            return;
+        }
+        showResponse(boxId, 'Board successfully created:<br><br>' + boardCard(data), false);
+        
+        document.getElementById('add-title').value = '';
+        document.getElementById('add-description').value = '';
+        document.getElementById('add-maxCapacity').value = '';
+        document.getElementById('add-currentCount').value = '0';
+        document.getElementById('add-createdAt').value = new Date().toISOString().slice(0, 16);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+
+async function putBoard() {
+    const boxId = 'res-update';
+    const id = document.getElementById('upd-id').value.trim();
+    const title = document.getElementById('upd-title').value.trim();
+    const description = document.getElementById('upd-description').value.trim();
+    const maxNoteCapacity = document.getElementById('upd-maxCapacity').value.trim();
+    const currentNoteCount = document.getElementById('upd-currentCount').value.trim();
+    const createdAt = document.getElementById('upd-createdAt').value;
+
+    if (!id || !title || !maxNoteCapacity || !currentNoteCount || !createdAt) {
+        showResponse(boxId, '⚠️ Action required: Put methods require specifying Target ID, Title, Max Note Capacity, Current Note Count, and Created At timestamp.', true);
+        return;
+    }
+
+    try {
+        const res = await fetch(API + '/Board/putData/' + id, {
+            method: 'PUT',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ 
+                id: parseInt(id),
+                title, 
+                description, 
+                maxNoteCapacity: parseInt(maxNoteCapacity),
+                currentNoteCount: parseInt(currentNoteCount),
+                createdAt: new Date(createdAt).toISOString()
+            })
+        });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showResponse(boxId, 'Transactional adjustment fault state: ' + (data.message || res.statusText), true);
+            return;
+        }
+        const data = await res.json();
+        showResponse(boxId, 'Complete updates processed successfully:<br><br>' + boardCard(data), false);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+
+async function patchBoard() {
+   const boxId = 'res-patch';
+    const id = document.getElementById('patch-id').value.trim();
+    const title = document.getElementById('patch-title').value.trim();
+    const description = document.getElementById('patch-description').value.trim();
+    const maxNoteCapacity = document.getElementById('patch-maxCapacity').value.trim();
+    const currentNoteCount = document.getElementById('patch-currentCount').value.trim();
+    const createdAt = document.getElementById('patch-createdAt').value;
+
+    if (!id) {
+        showResponse(boxId, '⚠️ Execution halt: Target Board ID Reference is mandatory for identification patching.', true);
+        return;
+    }
+
+    const payload = { id: parseInt(id) };
+    if (title) payload.title = title;
+    if (description) payload.description = description;
+    if (maxNoteCapacity) payload.maxNoteCapacity = parseInt(maxNoteCapacity);
+    if (currentNoteCount) payload.currentNoteCount = parseInt(currentNoteCount);
+    if (createdAt) payload.createdAt = new Date(createdAt).toISOString();
+
+    if (Object.keys(payload).length === 1) {
+        showResponse(boxId, '⚠️ Attention: Please fill in at least one selective update property field.', true);
+        return;
+    }
+
+    try {
+        const res = await fetch(API + '/Board/patchData/' + id, {
+            method: 'PATCH',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(payload)
+        });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showResponse(boxId, 'Error adjusting partial properties tree: ' + (data.message || res.statusText), true);
+            return;
+        }
+        const data = await res.json();
+        showResponse(boxId, 'Selective property patch deployment success:<br><br>' + boardCard(data), false);
+        
+        document.getElementById('patch-id').value = '';
+        document.getElementById('patch-title').value = '';
+        document.getElementById('patch-description').value = '';
+        document.getElementById('patch-maxCapacity').value = '';
+        document.getElementById('patch-currentCount').value = '';
+        document.getElementById('patch-createdAt').value = new Date().toISOString().slice(0, 16);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+
+async function doDelete() {
+    document.getElementById('delete-confirm-box').style.display = 'none';
+    const boxId = 'res-delete';
+    const id = document.getElementById('del-id').value.trim();
+
+    showResponse(boxId, 'Sending board layout deletion request sequence...', false);
+    try {
+        const res = await fetch(API + '/Board/deleteData/' + id, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const errorText = await res.text().catch(() => res.statusText);
+            showResponse(boxId, 'Deletion blocked: server error ' + res.status + ': ' + errorText, true);
+            return;
+        }
+        const successMessage = await res.text();
+        showResponse(boxId, '✅ Board record successfully wiped: ' + successMessage, false);
+        document.getElementById('del-id').value = '';
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+</script>
+
+</body>
+</html>

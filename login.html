@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 850px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .left {
+            width: 50%;
+            background: #eaf4ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left img {
+            width: 80%;
+        }
+
+        .right {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            width: 80%;
+            text-align: center;
+        }
+
+        h2 {
+            color: #1e3c72;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #999;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #3498db;
+        }
+
+        h4 {
+            margin: 20px 0;
+            color: gray;
+        }
+
+        a {
+            text-decoration: none;
+            color: #1e3c72;
+            font-weight: bold;
+        }
+
+        a:hover {
+            color: #3498db;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="left">
+            <img src="images/login.jpg">
+        </div>
+
+        <div class="right">
+
+            <div class="login-box">
+
+                <h2>LOGIN FORM</h2>
+
+                <form id="login-form">
+
+    <input
+        type="email"
+        id="login-email"
+        name="email"
+        placeholder="Enter Email"
+        required>
+
+    <input
+        type="password"
+        id="login-password"
+        name="password"
+        placeholder="Enter Password"
+        required>
+
+    <div id="login-error"
+         style="color:red;display:none;margin-top:10px;">
+    </div>
+
+    <button type="submit" id="login-btn">
+        LOGIN
+    </button>
+
+    <h4>OR</h4>
+
+    <a href="register.html">
+        <span style="color:red;">REGISTER</span>
+    </a>
+
+</form>
+            </div>
+
+        </div>
+
+    </div>
+<script>
+
+const API_BASE = "https://knotbackend-1.onrender.com";
+
+document.getElementById("login-form").addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    const errDiv = document.getElementById("login-error");
+    const btn = document.getElementById("login-btn");
+
+    errDiv.style.display = "none";
+
+    if(!email || !password){
+
+        errDiv.textContent = "Please enter email and password.";
+        errDiv.style.display = "block";
+        return;
+    }
+
+    btn.textContent = "Logging in...";
+    btn.disabled = true;
+
+    try{
+
+        const res = await fetch(API_BASE + "/auth/login",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+
+                email:email,
+                password:password
+
+            })
+
+        });
+
+        if(res.ok){
+
+            const data = await res.json();
+
+            localStorage.setItem("token", data.token);
+
+            alert("Login Successful");
+
+            window.location.href = "dashboard.html";
+
+        }else{
+
+            const data = await res.json().catch(function(){
+
+                return {};
+
+            });
+
+            errDiv.textContent =
+                data.message || "Invalid Email or Password.";
+
+            errDiv.style.display = "block";
+        }
+
+    }catch(error){
+
+        errDiv.textContent =
+            "Cannot connect to server. Make sure backend is running on port 8082.";
+
+        errDiv.style.display = "block";
+
+    }finally{
+
+        btn.textContent = "LOGIN";
+        btn.disabled = false;
+
+    }
+
+});
+
+</script>
+</body>
+
+</html>

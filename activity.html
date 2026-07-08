@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activity Operations Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            min-height: 100vh;
+        }
+
+        /* Header Style */
+        header {
+            background: #114285;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        header h1 i {
+            background: #ffeb3b;
+            color: #333;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-welcome {
+            font-size: 15px;
+            color: #e0e0e0;
+        }
+
+        #loggedEmail {
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            border-right: 1px solid rgba(255, 255, 255, 0.4);
+            padding-right: 15px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Container Layout */
+        .container {
+            width: 96%;
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: #0d3875;
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 70px;
+            height: 3px;
+            background-color: #6da2df;
+            margin-top: 10px;
+            border-radius: 2px;
+        }
+
+        /* Continuous row layout for top operation controllers - optimized for larger actions */
+        .modules-block {
+            display: flex;
+            justify-content: center;
+            align-items: stretch; /* Forces all buttons to maintain identical height */
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 40px;
+            flex-wrap: nowrap;
+        }
+
+        /* Sleek horizontal selection button architecture - Increased size parameters */
+        .small-btn {
+            flex: 1;
+            min-width: 0;
+            padding: 22px 14px; /* Increased top/bottom and side padding for a larger card style */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .small-btn:hover, .small-btn.active-tab {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+            outline: 3px solid #114285;
+        }
+
+        /* Theme Styling */
+        .note-yellow { background: #fef0be; }
+        .note-green { background: #e0f4cb; }
+        .note-pink { background: #fcdbdc; }
+        .note-blue { background: #daf0fd; }
+        .note-orange { background: #ffeacc; }
+
+        /* Increased icon sizes inside the button modules */
+        .note-icon { font-size: 22px; display: flex; align-items: center; }
+        .note-yellow .note-icon { color: #2e66b3; }
+        .note-green .note-icon { color: #e14d85; }
+        .note-pink .note-icon { color: #e67e22; }
+        .note-blue .note-icon { color: #435a6f; }
+        .note-orange .note-icon { color: #d35400; }
+
+        /* Increased descriptive title fonts */
+        .note-title { font-size: 19px; font-weight: 700; color: #202020; white-space: nowrap; }
+
+        /* Dynamic Active Panels Setup */
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #114285;
+            border-bottom: 2px solid #6da2df;
+            padding-bottom: 8px;
+        }
+
+        /* Form Controls Formatting */
+        .form-group {
+            margin-bottom: 15px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #114285;
+        }
+
+        .submit-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            background-color: #114285;
+            transition: background 0.2s;
+            margin-right: 5px;
+        }
+
+        .submit-btn:hover {
+            background-color: #0d3266;
+        }
+
+        /* Response Reporting Components */
+        .response-box {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 14px;
+            color: #333;
+            display: none;
+            text-align: left;
+        }
+
+        .response-box.show { display: block; }
+        .response-box.success { border-left: 5px solid #27ae60; }
+        .response-box.error { border-left: 5px solid #e74c3c; color: #c0392b; }
+
+        /* Tabular Layout Config */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        th {
+            background-color: #114285;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        tr:hover td { background-color: #f5f5f5; }
+
+        .back-btn {
+            background: #114285;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover { background: #0d3266; }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1><i class="fa-solid fa-chart-bar"></i> Dashboard</h1>
+    <div class="user-info">
+        <span class="user-welcome">Welcome, <span id="loggedEmail">Loading...</span></span>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</header>
+
+<div class="container">
+
+    <h2><i class="fa-solid fa-clock-rotate-left"></i> Activity Operations</h2>
+
+    <div class="modules-block">
+        <div class="small-btn note-pink" id="tab-post" onclick="showPanel('panel-add', 'tab-post')">
+            <div class="note-icon"><i class="fa-solid fa-square-plus"></i></div>
+            <div class="note-title">Post Activity</div>
+        </div>
+        <div class="small-btn note-yellow" id="tab-getall" onclick="showPanel('panel-getall', 'tab-getall')">
+            <div class="note-icon"><i class="fa-solid fa-table-cells-large"></i></div>
+            <div class="note-title">Get All Activities</div>
+        </div>
+        <div class="small-btn note-green" id="tab-getid" onclick="showPanel('panel-getbyid', 'tab-getid')">
+            <div class="note-icon"><i class="fa-solid fa-id-card"></i></div>
+            <div class="note-title">Get Activity By Id</div>
+        </div>
+        
+        <div class="small-btn note-blue" id="tab-put" onclick="showPanel('panel-update', 'tab-put')">
+            <div class="note-icon"><i class="fa-solid fa-square-check"></i></div>
+            <div class="note-title">Put Activity</div>
+        </div>
+        <div class="small-btn" id="tab-patch" onclick="showPanel('panel-patch', 'tab-patch')" style="background: #e3daf7;">
+            <div class="note-icon" style="color: #6f42c1;"><i class="fa-solid fa-user-pen"></i></div>
+            <div class="note-title">Patch Activity</div>
+        </div>
+        <div class="small-btn note-orange" id="tab-delete" onclick="showPanel('panel-delete', 'tab-delete')">
+            <div class="note-icon"><i class="fa-solid fa-trash-can"></i></div>
+            <div class="note-title">Delete Activity</div>
+        </div>
+    </div>
+
+    <div class="panel" id="panel-add">
+        <h3>Create New Activity Record</h3>
+        <div class="form-group">
+            <label>Action Description <span style="color:#e74c3c;">*</span></label>
+            <input type="text" id="add-actionDescription" placeholder="Describe the activity..." />
+        </div>
+        <div class="form-group">
+            <label>Timestamp <span style="color:#e74c3c;">*</span></label>
+            <input type="datetime-local" id="add-timestamp" />
+        </div>
+        <button class="submit-btn" onclick="addActivity()">Register Record Dataset</button>
+        <div class="response-box" id="res-add"></div>
+    </div>
+
+    <div class="panel" id="panel-getall">
+        <h3>All Registered Activities</h3>
+        <button class="submit-btn" onclick="fetchAllActivities()">Fetch All Activities</button>
+        <div class="response-box" id="res-getall"></div>
+    </div>
+
+    <div class="panel" id="panel-getbyid">
+        <h3>Retrieve Activity By ID</h3>
+        <div class="form-group">
+            <label>Activity ID</label>
+            <input type="number" id="getid-id" placeholder="e.g., 10" />
+        </div>
+        <button class="submit-btn" onclick="fetchActivityById()">Fetch Activity Dataset</button>
+        <div class="response-box" id="res-getbyid"></div>
+    </div>
+
+    <div class="panel" id="panel-update">
+        <h3>Put Activity (Complete Update)</h3>
+        <div class="form-group">
+            <label>Target Activity ID Reference <span style="color:#e74c3c;">*</span></label>
+            <input type="number" id="upd-id" placeholder="e.g., 10" />
+        </div>
+        <div class="form-group">
+            <label>Replace Action Description <span style="color:#e74c3c;">*</span></label>
+            <input type="text" id="upd-actionDescription" placeholder="New activity description..." />
+        </div>
+        <div class="form-group">
+            <label>Replace Timestamp <span style="color:#e74c3c;">*</span></label>
+            <input type="datetime-local" id="upd-timestamp" />
+        </div>
+        <button class="submit-btn" onclick="putActivity()">Execute Complete Modification</button>
+        <div class="response-box" id="res-update"></div>
+    </div>
+
+    <div class="panel" id="panel-patch">
+        <h3>Patch Activity (Partial Update)</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Modify only the fields you wish to change. Leave other fields empty to keep existing data.</p>
+        
+        <div class="form-group">
+            <label>Target Activity ID Reference <span style="color:#e74c3c;">*</span></label>
+            <input type="number" id="patch-id" placeholder="e.g., 10" />
+        </div>
+        <div class="form-group">
+            <label>Update Action Description</label>
+            <input type="text" id="patch-actionDescription" placeholder="Leave empty for no change" />
+        </div>
+        <div class="form-group">
+            <label>Update Timestamp</label>
+            <input type="datetime-local" id="patch-timestamp" />
+        </div>
+        <button class="submit-btn" style="background-color: #6f42c1;" onclick="patchActivity()">Execute Partial Modification</button>
+        <div class="response-box" id="res-patch"></div>
+    </div>
+
+    <div class="panel" id="panel-delete">
+        <h3>Purge Activity Index Record</h3>
+        <div class="form-group">
+            <label>Target Activity ID Reference</label>
+            <input type="number" id="del-id" placeholder="e.g., 10" />
+        </div>
+        <button class="submit-btn" style="background-color:#e74c3c;" onclick="confirmDelete()">Purge Activity Profile</button>
+        
+        <div id="delete-confirm-box" style="display:none; margin-top:15px; padding:15px; background:#fff3cd; border:2px dashed #e74c3c; border-radius:5px;">
+            <strong style="color:#e74c3c;"><i class="fa-solid fa-triangle-exclamation"></i> Critical Operation warning:</strong> Confirm permanent deletion?
+            <br><br>
+            <button onclick="doDelete()" style="background:#e74c3c;color:white;border:none;padding:8px 18px;border-radius:4px;cursor:pointer;font-weight:bold;">Yes, Confirm Purge</button>
+            <button onclick="cancelDelete()" style="background:#888;color:white;border:none;padding:8px 18px;border-radius:4px;cursor:pointer;margin-left:8px;">Cancel Action</button>
+        </div>
+        <div class="response-box" id="res-delete"></div>
+    </div>
+
+    <button class="back-btn" onclick="location.href='dashboard.html'">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </button>
+
+</div>
+
+<script>
+const API = 'https://knotbackend-1.onrender.com';
+
+// Authorization Gateway Checks
+const token = localStorage.getItem("token");
+if(!token){
+    window.location.href="login.html";
+}
+
+function getEmailFromToken(token){
+    try{
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.sub || payload.email || "User";
+    }
+    catch{
+        return "User";
+    }
+}
+document.getElementById("loggedEmail").innerText = getEmailFromToken(token);
+
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+
+function confirmDelete() {
+    const id = document.getElementById('del-id').value.trim();
+    if (!id) {
+        showResponse('res-delete', '⚠️ Execution halt: valid activity ID mapping missing.', true);
+        return;
+    }
+    document.getElementById('delete-confirm-box').style.display = 'block';
+}
+
+function cancelDelete() {
+    document.getElementById('delete-confirm-box').style.display = 'none';
+}
+
+// Dynamic Tab Switching
+function showPanel(panelId, tabId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.small-btn').forEach(t => t.classList.remove('active-tab'));
+    
+    document.getElementById(panelId).classList.add('active');
+    document.getElementById(tabId).classList.add('active-tab');
+}
+
+// Pre-fill fields with current local timestamp context accurately formatted for HTML5 controls
+function getLocalISOString() {
+    const tzOffset = new Date().getTimezoneOffset() * 60000; 
+    const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 16);
+    return localISOTime;
+}
+const nowISO = getLocalISOString();
+document.getElementById('add-timestamp').value = nowISO;
+document.getElementById('upd-timestamp').value = nowISO;
+
+function authHeaders(extraHeaders) {
+    return Object.assign({ 'Authorization': 'Bearer ' + token }, extraHeaders || {});
+}
+
+// Formats user-selected browser input values safely into database-friendly formats without changing local time hours
+function formatLocalInputToTimestamp(inputVal) {
+    if (!inputVal) return null;
+    return new Date(inputVal).toLocaleString('sv-SE').replace(' ', 'T');
+}
+
+function showResponse(boxId, content, isError) {
+    const box = document.getElementById(boxId);
+    box.className = 'response-box show ' + (isError ? 'error' : 'success');
+    box.innerHTML = content;
+}
+
+async function handleApiError(res, boxId) {
+    if (res.status === 401) {
+        alert('Session expired or authentication failed. Returning to login...');
+        localStorage.removeItem("token");
+        window.location.href = 'login.html';
+        return true;
+    }
+    if (res.status === 403) {
+        alert('Access Denied!\n\nYou do not have permissions to execute this endpoint.');
+        showResponse(boxId, '<strong>Access Denied</strong> - Role-based authorization verification failed.', true);
+        return true;
+    }
+    return false;
+}
+// NEW ONE-BY-ONE ACTIVITY CARD INTERFACE
+function activityCard(activity) {
+    const id = activity.id || '';
+    const actionDescription = activity.actionDescription || '';
+    const dateStr = activity.timestamp ? new Date(activity.timestamp).toLocaleString('en-US', { hour12: true }) : 'N/A';
+
+    return `
+        <div style="display: flex; flex-direction: column; gap: 8px; line-height: 1.5;">
+            <div><strong>ID Reference:</strong> ${id}</div>
+            <div><strong>Action Description:</strong> ${actionDescription}</div>
+            <div><strong>Timestamp:</strong> ${dateStr}</div>
+        </div>
+    `;
+}
+// ── 1. GET ALL ACTIVITIES ──
+async function fetchAllActivities() {
+    const boxId = 'res-getall';
+    showResponse(boxId, 'Processing data retrieval mapping...', false);
+    try {
+        const res = await fetch(API + '/Activities/Get', { headers: authHeaders() });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showResponse(boxId, 'Error processing entity query loop: ' + (data.message || res.statusText), true);
+            return;
+        }
+        const data = await res.json();
+        
+        if (!data || data.length === 0) {
+            showResponse(boxId, '<em>No matches found inside targeted database table.</em>', false);
+            return;
+        }
+        
+        let rows = data.map(a => {
+            return `
+            <tr>
+                <td><strong>${a.id}</strong></td>
+                <td>${a.actionDescription}</td>
+                <td>${a.timestamp ? new Date(a.timestamp).toLocaleString('en-US', { hour12: true }) : 'N/A'}</td>
+            </tr>`;
+        }).join('');
+        const tableHtml = `<table>
+                    <thead>
+                        <tr><th>Activity ID</th><th>Action Description</th><th>Timestamp</th></tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+        showResponse(boxId, tableHtml, false);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error. Ensure resource server is running.', true);
+    }
+}
+
+// ── 2. GET ACTIVITY BY ID ──
+async function fetchActivityById() {
+    const boxId = 'res-getbyid';
+    const id = document.getElementById('getid-id').value.trim();
+    if (!id) {
+        showResponse(boxId, '⚠️ Execution halt: valid activity ID mapping missing.', true);
+        return;
+    }
+    try {
+        const res = await fetch(API + '/Activities/Get/' + id, { headers: authHeaders() });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showResponse(boxId, 'Resource handling fault error: ' + (data.message || res.statusText), true);
+            return;
+        }
+        const data = await res.json();
+        showResponse(boxId, 'Activity data matched successfully:<br><br>' + activityCard(data), false);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+
+// ── 3. POST ACTIVITY ──
+async function addActivity() {
+    const boxId = 'res-add';
+    const actionDescription = document.getElementById('add-actionDescription').value.trim();
+    const timestamp = document.getElementById('add-timestamp').value;
+
+    if (!actionDescription || !timestamp) {
+        showResponse(boxId, '⚠️ Verification failure: Description and Timestamp must be filled.', true);
+        return;
+    }
+
+    const payload = {
+        actionDescription,
+        timestamp: formatLocalInputToTimestamp(timestamp)
+    };
+
+    try {
+        const res = await fetch(API + '/Activities/Post', {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(payload)
+        });
+        if (await handleApiError(res, boxId)) return;
+        const data = await res.json();
+        if (!res.ok) {
+            showResponse(boxId, 'Constraint validation failure: ' + (data.message || res.statusText), true);
+            return;
+        }
+        showResponse(boxId, 'Activity successfully created:<br><br>' + activityCard(data), false);
+        
+        document.getElementById('add-actionDescription').value = '';
+        document.getElementById('add-timestamp').value = getLocalISOString();
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+
+// ── 4. PUT ACTIVITY ──
+async function putActivity() {
+    const boxId = 'res-update';
+    const id = document.getElementById('upd-id').value.trim();
+    const actionDescription = document.getElementById('upd-actionDescription').value.trim();
+    const timestamp = document.getElementById('upd-timestamp').value;
+
+    if (!id || !actionDescription || !timestamp) {
+        showResponse(boxId, '⚠️ Action required: Put methods require specifying Target ID, Description, and Timestamp.', true);
+        return;
+    }
+
+    try {
+        const res = await fetch(API + '/Activities/Put/' + id, {
+            method: 'PUT',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ 
+                id: parseInt(id),
+                actionDescription, 
+                timestamp: formatLocalInputToTimestamp(timestamp)
+            })
+        });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showResponse(boxId, 'Transactional adjustment fault state: ' + (data.message || res.statusText), true);
+            return;
+        }
+        const data = await res.json();
+        showResponse(boxId, 'Complete updates processed successfully:<br><br>' + activityCard(data), false);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+
+// ── 5. PATCH ACTIVITY ──
+async function patchActivity() {
+    const boxId = 'res-patch';
+    const id = document.getElementById('patch-id').value.trim();
+    const actionDescription = document.getElementById('patch-actionDescription').value.trim();
+    const timestamp = document.getElementById('patch-timestamp').value;
+
+    if (!id) {
+        showResponse(boxId, '⚠️ Action required: Patch methods require specifying a Target ID Reference.', true);
+        return;
+    }
+
+    const payload = {};
+    if (actionDescription) payload.actionDescription = actionDescription;
+    if (timestamp) payload.timestamp = formatLocalInputToTimestamp(timestamp);
+
+    if (Object.keys(payload).length === 0) {
+        showResponse(boxId, '⚠️ Action suspended: No fields modified. Please modify at least one field to patch.', true);
+        return;
+    }
+
+    showResponse(boxId, 'Configuring delta payload synchronization...', false);
+
+    try {
+        const res = await fetch(API + '/Activities/Patch/' + id, {
+            method: 'PATCH',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(payload)
+        });
+        
+        if (await handleApiError(res, boxId)) return;
+        
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showResponse(boxId, 'Delta deployment operational failure: ' + (data.message || res.statusText), true);
+            return;
+        }
+        
+        const data = await res.json();
+        showResponse(boxId, 'Partial adjustments updated cleanly:<br><br>' + activityCard(data), false);
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error encountered during patch transaction.', true);
+    }
+}
+
+// ── 6. DELETE ACTIVITY ──
+async function doDelete() {
+    document.getElementById('delete-confirm-box').style.display = 'none';
+    const boxId = 'res-delete';
+    const id = document.getElementById('del-id').value.trim();
+
+    showResponse(boxId, 'Sending activity data deletion request sequence...', false);
+    try {
+        const res = await fetch(API + '/Activities/Delete/' + id, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        if (await handleApiError(res, boxId)) return;
+        if (!res.ok) {
+            const errorText = await res.text().catch(() => res.statusText);
+            showResponse(boxId, 'Deletion blocked: server error ' + res.status + ': ' + errorText, true);
+            return;
+        }
+        const successMessage = await res.text();
+        showResponse(boxId, '✅ Activity record successfully wiped: ' + successMessage, false);
+        document.getElementById('del-id').value = '';
+    } catch (e) {
+        showResponse(boxId, 'Connectivity dropout error.', true);
+    }
+}
+</script>
+
+</body>
+</html>

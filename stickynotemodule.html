@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sticky Note Overview - Virtual Sticky Note Platform</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+body {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: lightblue;
+    color: #333;
+    font-family: Arial, Helvetica, sans-serif;
+    /* Prevents the blurred pseudo-element edge overflow from causing scrollbars */
+    overflow-x: hidden; 
+}
+
+/* Pseudo-element dedicated solely to holding and blurring the background */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Keeps the background behind your website content */
+    background-image: url('images/stickynote.jpeg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Adjust the pixel values below to control your blur depth */
+    filter: blur(6px); 
+    -webkit-filter: blur(6px);
+    
+    /* Slight scale trick prevents a white border line artifact around the blurred screen edge */
+    transform: scale(1.03); 
+}
+
+header{
+    background:#0d47a1;
+    color:white;
+    padding:20px 50px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h2{
+    font-size:28px;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:bold;
+}
+
+.hero{
+    background: transparent;
+    text-align:center;
+    padding: 40px 20px 20px 20px;
+}
+
+/* UPDATED: Structured transparent light container to ensure readability */
+.hero{
+    background: transparent;
+    text-align:center;
+    padding: 40px 20px 20px 20px;
+    }
+.hero-text-container {
+    background: rgba(245, 249, 255, 0.82); /* Soft, light, and beautifully transparent */
+    max-width: 850px;
+    margin: 15px auto 0 auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.4); /* Re-enabled this for a crisp glass border edge! */
+}
+
+.hero h1{
+    font-size: 40px; 
+    margin-bottom: 12px;
+    color: #0d47a1; 
+    font-weight: bold;
+}
+
+.hero p{
+    font-size: 19px; 
+    max-width: 780px;
+    margin: auto;
+    color: #222222; 
+    line-height: 1.6;
+    font-weight: 700;
+}
+
+.hero-image{
+    width:220px;
+    max-width:100%;
+    border-radius:15px;
+    margin-bottom:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:20px auto 40px auto;
+}
+
+.section{
+    background: rgba(255, 255, 255, 0.95);
+    padding:30px;
+    border-radius:12px;
+    margin-bottom:30px;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
+    backdrop-filter: blur(5px);
+}
+
+.section h2{
+    color:#1565c0;
+    margin-bottom:15px;
+}
+
+.section p{
+    line-height:1.8;
+    text-align:justify;
+    margin-bottom: 15px;
+}
+
+/* 2X2 GRID SYSTEM FOR OBJECTIVES */
+.resp-grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.resp-card {
+    background:  #f5f9ff;
+    border: 1px solid #e2edff;
+    border-left: 5px solid #00796b; 
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    box-shadow: 0 4px 10px rgba(0, 121, 107, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resp-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 121, 107, 0.08);
+}
+
+.resp-card-icon {
+    font-size: 28px;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.resp-card-content h3 {
+    color: #0d47a1;
+    font-size: 17px;
+    margin-bottom: 6px;
+}
+
+.resp-card-content p {
+    font-size: 14px;
+    color: #555;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.card{
+    background:#f5f9ff;
+    border-left:6px solid #00796b; 
+    padding:20px;
+    border-radius:10px;
+}
+
+.card h3{
+    margin-bottom:10px;
+    color:#0d47a1;
+    font-size: 18px;
+}
+
+/* SIDE-BY-SIDE LAYOUT FOR STRATEGIC IMPORTANCE */
+.importance-container {
+    background: #f5f9ff;
+    border-left: 6px solid #00796b; 
+    padding: 25px;
+    border-radius: 8px;
+}
+
+.importance-container h3 {
+    color: #0d47a1;
+    font-size: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.importance-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+}
+
+.importance-text {
+    flex: 1.6;
+}
+
+.importance-list {
+    list-style-type: none;
+}
+
+.importance-list li {
+    margin-bottom: 15px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.importance-list li:last-child {
+    margin-bottom: 0;
+}
+
+.importance-list li strong {
+    color: #0d47a1;
+    font-size: 16px;
+    display: inline-block;
+    margin-bottom: 2px;
+}
+
+.importance-image {
+    flex: 1;
+    text-align: center;
+}
+
+.importance-image img {
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.buttons{
+    text-align:center;
+    margin:40px 0;
+}
+
+.buttons button{
+    padding:15px 35px;
+    border:none;
+    border-radius:8px;
+    font-size:18px;
+    cursor:pointer;
+    margin:10px;
+    transition: background 0.2s ease;
+}
+
+.crud{
+    background:#1565c0;
+    color:white;
+}
+
+.crud:hover {
+    background:#0d47a1;
+}
+
+.dashboard{
+    background:#666;
+    color:white;
+}
+
+.dashboard:hover {
+    background:#555;
+}
+
+footer{
+    background:#0d47a1;
+    color:white;
+    text-align:center;
+    padding:25px;
+    margin-top:40px;
+}
+
+footer p{
+    margin:8px;
+}
+
+@media(max-width: 768px) {
+    .resp-grid-container {
+        grid-template-columns: 1fr;
+    }
+    .importance-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .importance-image {
+        margin-top: 20px;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+    <h2>📝 Virtual Sticky Note Platform</h2>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-text-container">
+        <h1>📌 Sticky Note Module</h1>
+        <p>
+            Sticky Notes are the atomic data blocks of your workspace. They store granular information, track ideas, and interact dynamically inside your digital canvases.
+        </p>
+    </div>
+</section>
+
+<div class="container">
+
+    <div class="section">
+        <h2>About Sticky Notes</h2>
+        <p>
+            A Sticky Note is an individual, highly reactive node containing textual content, metadata tags, and geometric position parameters. Each note is tethered securely to a specific Brainstorming Board instance. They allow cross-functional project contributors to document independent action tasks, visualize system logic dependencies, and cluster relative concepts dynamically.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Core Objectives</h2>
+        <div class="resp-grid-container">
+            <div class="resp-card">
+                <div class="resp-card-icon">🎯</div>
+                <div class="resp-card-content">
+                    <h3>1. Granular Visual Ideation</h3>
+                    <p>To break high-level architectural concepts into flexible, bite-sized tasks that teams can easily digest.</p>
+                </div>
+            </div>
+
+            <div class="resp-card">
+                <div class="resp-card-icon">⚡</div>
+                <div class="resp-card-content">
+                    <h3>2. Dynamic Interactivity</h3>
+                    <p>To support responsive real-time drag, drop, and resizing actions that perfectly mirror physical brainstorming steps.</p>
+                </div>
+            </div>
+
+            <div class="resp-card">
+                <div class="resp-card-icon">🏷️</div>
+                <div class="resp-card-content">
+                    <h3>3. Contextual Organization</h3>
+                    <p>To instantly filter and arrange raw team thoughts using targeted color channels and semantic priority labels.</p>
+                </div>
+            </div>
+
+            <div class="resp-card">
+                <div class="resp-card-icon">🧩</div>
+                <div class="resp-card-content">
+                    <h3>4. Seamless Integration</h3>
+                    <p>To link note instances cleanly with relational tracking boards, avoiding broken nodes or floating data blocks.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>System Architecture & Alignment</h2>
+        <p>Understanding the fundamental value and systemic positioning of individual note assets within an enterprise collaboration flow:</p>
+        
+        <div class="importance-container">
+            <h3>💡 Functional Importance of the Sticky Note Model</h3>
+            
+            <div class="importance-wrapper">
+                <div class="importance-text">
+                    <ul class="importance-list">
+                        <li>
+                            <strong>1. Preventing Architectural Overload</strong><br>
+                            Isolating raw data blocks ensures that complex feature workflows remain visual and digestible, lowering barriers to cross-functional interaction.
+                        </li>
+                        <li>
+                            <strong>2. Preserving Real-Time Group Alignment</strong><br>
+                            Because notes synchronize layout properties instantly, distributed operations can confidently establish a unified source of truth without facing content desyncs.
+                        </li>
+                        <li>
+                            <strong>3. Enabling Clean Historical Logs</strong><br>
+                            Every modification links to tracking streams, making it easy to trace project timelines and audit action items for security reviews.
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="importance-image">
+                    <img src="images/system.jpeg" alt="Sticky Note Strategic Importance">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Data Privacy Controls</h2>
+        <p>The application implements rigorous server-side safety boundaries and validation mechanics to secure your information layer:</p>
+        
+        <div class="cards">
+            <div class="card">
+                <h3>🔒 Board-Level Isolation</h3>
+                <p>Notes are structurally encapsulated within their specific parents. Unauthorized users cannot read or inject hidden content blocks across workspaces.</p>
+            </div>
+            <div class="card">
+                <h3>👤 Context-Locked Modifiers</h3>
+                <p>Only verified canvas owners or team contributors with active read/write permissions can alter text parameters or clear elements.</p>
+            </div>
+            <div class="card">
+                <h3>🛡️ Sanitized Inputs</h3>
+                <p>Every keystroke update passes through secure validation routines to neutralize cross-site scripting vulnerabilities before saving.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button class="crud" onclick="location.href='stickynote.html'">
+            Proceed to Sticky Note CRUD Operations
+        </button>
+        <button class="dashboard" onclick="location.href='dashboard.html'">
+            Back to Dashboard
+        </button>
+    </div>
+
+</div>
+
+<footer>
+    <h2>Virtual Sticky Note Brainstorming Platform</h2>
+    <p>Efficient Collaboration • Creative Brainstorming • Organized Ideas</p>
+    <p>© 2026 Virtual Sticky Note Platform. All Rights Reserved.</p>
+</footer>
+
+</body>
+</html>

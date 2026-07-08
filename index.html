@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Sticky Note Brainstorming Platform</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(90deg, #4ef2d2 0%, #00f2fe 30%, #a1c4fd 70%, #c2e9fb 100%);
+            background-attachment: fixed;
+            padding: 40px 0;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: #163a6b;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 50px;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto 10px auto;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+        }
+
+        .navbar ul li {
+            margin-left: 30px;
+        }
+
+        .navbar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 17px;
+            transition: .3s;
+        }
+
+        .navbar ul li a:hover {
+            color: #ffd700;
+        }
+
+        /* Main Container */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            background: white;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .25);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            color: white;
+            text-align: center;
+            padding: 45px;
+        }
+
+        .header h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 21px;
+            color: #dce9ff;
+        }
+
+        /* About Section (Side-by-Side Layout) */
+        .about-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+            padding: 50px; 
+        }
+
+        .about-text {
+            flex: 1.3;
+        }
+
+        .about-text h2 {
+            color: #1e3c72;
+            font-size: 34px;
+            margin-bottom: 20px;
+        }
+
+        .about-text p {
+            font-size: 17px;
+            line-height: 1.8;
+            color: #333;
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            margin-top: 25px;
+        }
+
+        .button a {
+            text-decoration: none;
+            background: #1e3c72;
+            color: white;
+            padding: 14px 38px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: .3s;
+            display: inline-block;
+        }
+
+        .button a:hover {
+            background: #3498db;
+        }
+
+        .about-image {
+            flex: 0.8;
+            text-align: center;
+        }
+
+        .about-image img {
+            width: 320px;
+            max-width: 100%;
+            transition: .3s;
+        }
+
+        .about-image img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Feature Cards */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px 50px 40px;
+        }
+
+        .card {
+            background: #f5f9ff;
+            border-left: 5px solid #2a5298;
+            border-radius: 10px;
+            padding: 20px;
+            transition: .3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,.15);
+        }
+
+        .card h3 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 21px;
+        }
+
+        .card p {
+            color: #555;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* --- Extra Bottom Content Section --- */
+        .more-info-section {
+            background: #fff;
+            padding: 50px;
+            border-top: 1px solid #e2edf8;
+        }
+
+        .more-info-section h2 {
+            color: #1e3c72;
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .info-block h4 {
+            color: #2a5298;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .info-block p {
+            color: #444;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Contact Section - Modified for Single Line Listing */
+        .contact-section {
+            background: #f9fbfd;
+            border-top: 1px solid #e2edf8;
+            padding: 40px 50px;
+            text-align: center;
+        }
+
+        .contact-section h2 {
+            color: #1e3c72;
+            font-size: 28px;
+            margin-bottom: 25px;
+        }
+
+        .contact-container {
+            display: flex;
+            flex-direction: column; /* Puts items one under another */
+            align-items: center;
+            gap: 15px; /* Spaces out the rows */
+        }
+
+        .contact-item {
+            font-size: 18px;
+            color: #444;
+            background: white;
+            padding: 10px 30px;
+            border-radius: 8px;
+            border: 1px solid #e2edf8;
+            width: 100%;
+            max-width: 450px; /* Kept tight and readable */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .contact-item strong {
+            color: #1e3c72;
+        }
+
+        footer {
+            background: #1e3c72;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        /* Responsive Layouts */
+        @media(max-width:950px){
+            .about-section {
+                flex-direction: column-reverse;
+                text-align: center;
+            }
+            .about-text p {
+                text-align: center;
+            }
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:650px){
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .navbar ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .navbar ul li {
+                margin: 5px 15px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="logo">Sticky Notes</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="login.html">Login</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+
+        <div class="header">
+            <h1>Virtual Sticky Note Brainstorming Platform</h1>
+            <p>Collaborate • Organize • Innovate</p>
+        </div>
+
+        <div class="about-section" id="about">
+            <div class="about-text">
+                <h2>About the Platform</h2>
+                <p>
+                    The <strong>Virtual Sticky Note Brainstorming Platform</strong> is a secure web-based 
+                    collaboration application designed to make brainstorming sessions simple, organized, 
+                    and highly effective. Instead of relying on traditional paper sticky notes, teams can 
+                    instantly create, stack, and manage digital canvas cards on a shared interactive board.
+                </p>
+                <p>
+                    In this project, a session facilitator maintains administrative authority over the workspace architecture, 
+                    while contributors are empowered to seamlessly add, edit, precisely reposition, and clear sticky notes 
+                    in real-time. Built on a powerful Spring Boot architecture and secured using JWT authentication.
+                </p>
+                <div class="button">
+                    <a href="login.html">GET STARTED</a>
+                </div>
+            </div>
+
+            <div class="about-image">
+                <img src="images/Sticky-note.png" alt="Sticky Note">
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="card">
+                <h3>📌 Board Management</h3>
+                <p>Create, update, and organize brainstorming boards with capacity validation, allowing facilitators to manage sessions efficiently.</p>
+            </div>
+
+            <div class="card">
+                <h3>📝 Sticky Notes</h3>
+                <p>Add, edit, move, and restore sticky notes using an intuitive drag-and-drop interface for smooth and interactive collaboration.</p>
+            </div>
+
+            <div class="card">
+                <h3>👥 Role-Based Access</h3>
+                <p>Secure the application with JWT authentication and provide different permissions for Facilitators, Contributors, and Stakeholders.</p>
+            </div>
+
+            <div class="card">
+                <h3>📊 Workspace Analytics</h3>
+                <p>View brainstorming statistics, monitor user activities, and analyze collaboration progress to improve team productivity.</p>
+            </div>
+        </div>
+
+        <div class="more-info-section">
+            <h2>Why Choose Our Platform?</h2>
+            <div class="info-grid">
+                <div class="info-block">
+                    <h4>🚀 Seamless Real-Time Synchronization</h4>
+                    <p>Experience zero latency as your team maps ideas together. Edits, movements, and color changes appear instantly on everyone's screen, making distance feel non-existent.</p>
+                </div>
+                <div class="info-block">
+                    <h4>🔒 Enterprise-Grade Security</h4>
+                    <p>Your ideas are valuable intellectual property. Powered by rigorous JSON Web Token validations, your workspaces remain securely insulated from unverified external access.</p>
+                </div>
+                <div class="info-block">
+                    <h4>🛠 Facilitator-Centric Control</h4>
+                    <p>Maintain complete structural direction. Set canvas size limits, assign unique granular team roles, and clear cluttered layouts effortlessly with master administrator buttons.</p>
+                </div>
+                <div class="info-block">
+                    <h4>📈 Purpose-Driven Productivity</h4>
+                    <p>Move past random thoughts into structural solutions. Group matching insights, analyze engagement logs, and directly translate data maps into workable development blueprints.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-section">
+            <h2>Contact Us</h2>
+            <div class="contact-container">
+                <div class="contact-item">
+                    <strong>Email:</strong> support@gmail.com
+                </div>
+                <div class="contact-item">
+                    <strong>Phone:</strong> +91 97891 75124
+                </div>
+                <div class="contact-item">
+                    <strong>Support Hours:</strong> Mon - Fri, 9 AM - 6 PM
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            © 2026 Virtual Sticky Note Brainstorming Platform | Secure Collaborative Workspace
+        </footer>
+
+    </div>
+
+</body>
+</html>
+
