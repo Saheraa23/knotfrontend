@@ -774,8 +774,9 @@ async function addNote() {
         yPos: parseInt(yPos)
     };
 
-    if (createdAt) payload.createdAt = new Date(createdAt).toISOString();
-    if (deletedAt) payload.deletedAt = new Date(deletedAt).toISOString();
+    // FIX: Send the local string format directly or append local timezone context
+    if (createdAt) payload.createdAt = new Date(createdAt).getTime() ? new Date(createdAt - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, -1) : new Date().toISOString();
+    if (deletedAt) payload.deletedAt = new Date(deletedAt - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
 
     try {
         const res = await fetch(API + '/Note/postNote', {
@@ -801,7 +802,6 @@ async function addNote() {
         showResponse(boxId, 'Connectivity dropout error.', true);
     }
 }
-
 // ── 4. PUT NOTE ──
 async function putNote() {
     const boxId = 'res-update';
@@ -826,10 +826,10 @@ async function putNote() {
         xPos: parseInt(xPos),
         yPos: parseInt(yPos),
         version: parseInt(version),
-        createdAt: new Date(createdAt).toISOString()
+        createdAt: new Date(new Date(createdAt) - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, -1)
     };
     
-    if (deletedAt) payload.deletedAt = new Date(deletedAt).toISOString();
+    if (deletedAt) payload.deletedAt = new Date(new Date(deletedAt) - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
 
     try {
         const res = await fetch(API + '/Note/putNote/' + id, {
@@ -876,8 +876,8 @@ async function patchNote() {
     if (colorCode) payload.colorCode = colorCode;
     if (xPos) payload.xPos = parseInt(xPos);
     if (yPos) payload.yPos = parseInt(yPos);
-    if (createdAt) payload.createdAt = new Date(createdAt).toISOString();
-    if (deletedAt) payload.deletedAt = new Date(deletedAt).toISOString();
+    if (createdAt) payload.createdAt = new Date(new Date(createdAt) - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
+    if (deletedAt) payload.deletedAt = new Date(new Date(deletedAt) - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
 
     if (Object.keys(payload).length === 2) {
         showResponse(boxId, '⚠️ Attention: Please fill in at least one field to execute a patch change.', true);
