@@ -211,6 +211,41 @@
             font-size: 14px;
         }
 
+        /* NEW RE-DESIGN: Wrapper structure to accurately dock a functional calendar icon to the right */
+        .datetime-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Hides default native box styles while maintaining input structure */
+        .datetime-wrapper input[type="datetime-local"] {
+            padding-right: 40px; /* Leave space for our click icon */
+        }
+
+        /* Completely hides the browser's unpredictable tiny icon box */
+        .datetime-wrapper input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Custom absolute calendar visual selector positioned inside input box right edge */
+        .datetime-wrapper .calendar-trigger-icon {
+            position: absolute;
+            right: 14px;
+            color: #555;
+            font-size: 16px;
+            pointer-events: none; /* Allows click events to fall directly through to open picker */
+        }
+
         .form-group textarea {
             resize: vertical;
             min-height: 80px;
@@ -331,11 +366,11 @@
             <div class="note-icon"><i class="fa-solid fa-square-check"></i></div>
             <div class="note-title">Put Note</div>
         </div>
-        <div class="small-btn note-purple" id="tab-patch" onclick="showPanel('panel-patch', 'tab-patch')">
+        <div class="small-btn note-purple" id="tab-patch" onclick="showPanel('panel-patch', 'tab-purple')">
             <div class="note-icon"><i class="fa-solid fa-pen-to-square"></i></div>
             <div class="note-title">Patch Note</div>
         </div>
-        <div class="small-btn note-orange" id="tab-delete" onclick="showPanel('panel-delete', 'tab-delete')">
+        <div class="small-btn note-orange" id="tab-delete" onclick="showPanel('panel-delete', 'tab-orange')">
             <div class="note-icon"><i class="fa-solid fa-trash-can"></i></div>
             <div class="note-title">Delete Note</div>
         </div>
@@ -376,12 +411,18 @@
             <input type="number" id="add-yPos" placeholder="e.g., 320" />
         </div>
         <div class="form-group">
-            <label>Created At Timestamp (MM/DD/YYYY, HH:MM AM/PM)</label>
-            <input type="text" id="add-createdAt" placeholder="MM/DD/YYYY, hh:mm AM/PM" />
+            <label>Created At Timestamp</label>
+            <div class="datetime-wrapper" onclick="triggerPicker('add-createdAt')">
+                <input type="datetime-local" id="add-createdAt" />
+                <i class="fa-regular fa-calendar-days calendar-trigger-icon"></i>
+            </div>
         </div>
         <div class="form-group">
             <label>Deleted At Timestamp (Optional)</label>
-            <input type="text" id="add-deletedAt" placeholder="MM/DD/YYYY, hh:mm AM/PM" />
+            <div class="datetime-wrapper" onclick="triggerPicker('add-deletedAt')">
+                <input type="datetime-local" id="add-deletedAt" />
+                <i class="fa-regular fa-calendar-days calendar-trigger-icon"></i>
+            </div>
         </div>
         <button class="submit-btn" onclick="addNote()">Register Note Dataset</button>
         <div class="response-box" id="res-add"></div>
@@ -415,11 +456,17 @@
         </div>
         <div class="form-group">
             <label>Replace Created At Timestamp <span style="color:#e74c3c;">*</span></label>
-            <input type="text" id="upd-createdAt" placeholder="MM/DD/YYYY, hh:mm AM/PM" />
+            <div class="datetime-wrapper" onclick="triggerPicker('upd-createdAt')">
+                <input type="datetime-local" id="upd-createdAt" />
+                <i class="fa-regular fa-calendar-days calendar-trigger-icon"></i>
+            </div>
         </div>
         <div class="form-group">
             <label>Replace Deleted At Timestamp</label>
-            <input type="text" id="upd-deletedAt" placeholder="MM/DD/YYYY, hh:mm AM/PM" />
+            <div class="datetime-wrapper" onclick="triggerPicker('upd-deletedAt')">
+                <input type="datetime-local" id="upd-deletedAt" />
+                <i class="fa-regular fa-calendar-days calendar-trigger-icon"></i>
+            </div>
         </div>
         <button class="submit-btn" onclick="putNote()">Execute Complete Modification</button>
         <div class="response-box" id="res-update"></div>
@@ -454,11 +501,17 @@
         </div>
         <div class="form-group">
             <label>Mutate Created At Timestamp (Optional)</label>
-            <input type="text" id="patch-createdAt" placeholder="MM/DD/YYYY, hh:mm AM/PM" />
+            <div class="datetime-wrapper" onclick="triggerPicker('patch-createdAt')">
+                <input type="datetime-local" id="patch-createdAt" />
+                <i class="fa-regular fa-calendar-days calendar-trigger-icon"></i>
+            </div>
         </div>
         <div class="form-group">
             <label>Mutate Deleted At Timestamp (Optional)</label>
-            <input type="text" id="patch-deletedAt" placeholder="MM/DD/YYYY, hh:mm AM/PM" />
+            <div class="datetime-wrapper" onclick="triggerPicker('patch-deletedAt')">
+                <input type="datetime-local" id="patch-deletedAt" />
+                <i class="fa-regular fa-calendar-days calendar-trigger-icon"></i>
+            </div>
         </div>
         <button class="submit-btn" onclick="patchNote()">Execute Partial Patch Modification</button>
         <div class="response-box" id="res-patch"></div>
@@ -512,6 +565,14 @@ function logout() {
     window.location.href = "login.html";
 }
 
+// FORCE DATEPICKER DROPDOWN PANEL POPUP UPON ENTIRE ELEMENT WRAPPER CLICK
+function triggerPicker(inputId) {
+    const inputEl = document.getElementById(inputId);
+    if (inputEl && typeof inputEl.showPicker === 'function') {
+        inputEl.showPicker();
+    }
+}
+
 function confirmDelete() {
     const id = document.getElementById('del-id').value.trim();
     if (!id) {
@@ -531,10 +592,16 @@ function showPanel(panelId, tabId) {
     document.querySelectorAll('.small-btn').forEach(t => t.classList.remove('active-tab'));
     
     document.getElementById(panelId).classList.add('active');
-    document.getElementById(tabId).classList.add('active-tab');
+    
+    if(tabId === 'tab-post') document.getElementById('tab-post').classList.add('active-tab');
+    if(tabId === 'tab-getall') document.getElementById('tab-getall').classList.add('active-tab');
+    if(tabId === 'tab-getid') document.getElementById('tab-getid').classList.add('active-tab');
+    if(tabId === 'tab-put') document.getElementById('tab-put').classList.add('active-tab');
+    if(tabId === 'tab-purple') document.getElementById('tab-patch').classList.add('active-tab');
+    if(tabId === 'tab-orange') document.getElementById('tab-delete').classList.add('active-tab');
 }
 
-// Helper: Formats JS Date instance into readable 'MM/DD/YYYY, hh:mm AM/PM' string
+// Helper: Formats JS Date instance explicitly into 'MM/DD/YYYY, hh:mm AM/PM'
 function formatTo12HourLocal(dateObj) {
     if (!dateObj || isNaN(dateObj.getTime())) return 'None';
     return dateObj.toLocaleString('en-US', {
@@ -547,20 +614,24 @@ function formatTo12HourLocal(dateObj) {
     });
 }
 
-// Helper: Tries to safely parse 12-hour local text strings back to standard ISO for API payload conversion
-function parseToISOString(textValue) {
-    if (!textValue || textValue.trim() === "") return null;
-    const parsed = new Date(textValue);
-    if (!isNaN(parsed.getTime())) {
-        return parsed.toISOString();
-    }
-    return null;
+// Helper: Local Date initializer for datetime-local browser input values
+function getLocalDatetimeString() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-// Initialize input fields with current live local 12-hour time format
-const nowFormatted = formatTo12HourLocal(new Date());
-document.getElementById('add-createdAt').value = nowFormatted;
-document.getElementById('upd-createdAt').value = nowFormatted;
+// Reset datetime picker inputs cleanly using local time string formatting
+function initializeDateFields() {
+    const initTime = getLocalDatetimeString();
+    document.getElementById('add-createdAt').value = initTime;
+    document.getElementById('upd-createdAt').value = initTime;
+}
+initializeDateFields();
 
 function authHeaders(extraHeaders) {
     return Object.assign({ 'Authorization': 'Bearer ' + token }, extraHeaders || {});
@@ -589,13 +660,12 @@ async function handleApiError(res, boxId) {
 
 function noteCard(note) {
     const id = note.id || '';
-    const text = note.content || '';
     const color = note.colorCode || note.colorcode || 'N/A';
     const x = note.xPos ?? note.xpos ?? 0;
     const y = note.yPos ?? note.ypos ?? 0;
     const v = note.version ?? 0;
     
-    // Outputs 12-hour display formatting inside dashboard single components view
+    // Explicit 12-Hour conversion formatting on output elements
     const createdStr = note.createdAt ? formatTo12HourLocal(new Date(note.createdAt)) : 'N/A';
     const rawDeletedAt = note.deletedAt || note.deletedat;
     const deleteStr = rawDeletedAt ? formatTo12HourLocal(new Date(rawDeletedAt)) : 'None';
@@ -632,7 +702,6 @@ async function fetchAllNotes() {
             const y = n.yPos ?? n.ypos ?? 0;
             const v = n.version ?? 0;
             
-            // Render outputs cleanly in 12-hour format inside table rows
             const displayCreatedAt = n.createdAt ? formatTo12HourLocal(new Date(n.createdAt)) : 'N/A';
             const rawDeletedAt = n.deletedAt || n.deletedat;
             const displayDeletedAt = rawDeletedAt ? formatTo12HourLocal(new Date(rawDeletedAt)) : 'None';
@@ -690,8 +759,8 @@ async function addNote() {
     const colorCode = document.getElementById('add-colorCode').value.trim();
     const xPos = document.getElementById('add-xPos').value.trim();
     const yPos = document.getElementById('add-yPos').value.trim();
-    const createdAt = document.getElementById('add-createdAt').value.trim();
-    const deletedAt = document.getElementById('add-deletedAt').value.trim();
+    const createdAt = document.getElementById('add-createdAt').value;
+    const deletedAt = document.getElementById('add-deletedAt').value;
 
     if (!content || xPos === "" || yPos === "") {
         showResponse(boxId, '⚠️ Verification failure: Content, X Position, and Y Position fields are required.', true);
@@ -705,15 +774,8 @@ async function addNote() {
         yPos: parseInt(yPos)
     };
 
-    // Safely transform text formats back to standard backend API parsing structures
-    if (createdAt) {
-        const iso = parseToISOString(createdAt);
-        if (iso) payload.createdAt = iso;
-    }
-    if (deletedAt) {
-        const iso = parseToISOString(deletedAt);
-        if (iso) payload.deletedAt = iso;
-    }
+    if (createdAt) payload.createdAt = new Date(createdAt).toISOString();
+    if (deletedAt) payload.deletedAt = new Date(deletedAt).toISOString();
 
     try {
         const res = await fetch(API + '/Note/postNote', {
@@ -729,12 +791,11 @@ async function addNote() {
         }
         showResponse(boxId, 'Sticky Note successfully created:<br><br>' + noteCard(data), false);
         
-        // Reset Form Fields
         document.getElementById('add-content').value = '';
         document.getElementById('add-colorCode').value = '';
         document.getElementById('add-xPos').value = '';
         document.getElementById('add-yPos').value = '';
-        document.getElementById('add-createdAt').value = formatTo12HourLocal(new Date());
+        initializeDateFields();
         document.getElementById('add-deletedAt').value = '';
     } catch (e) {
         showResponse(boxId, 'Connectivity dropout error.', true);
@@ -750,17 +811,11 @@ async function putNote() {
     const xPos = document.getElementById('upd-xPos').value.trim();
     const yPos = document.getElementById('upd-yPos').value.trim();
     const version = document.getElementById('upd-version').value.trim();
-    const createdAt = document.getElementById('upd-createdAt').value.trim();
-    const deletedAt = document.getElementById('upd-deletedAt').value.trim();
+    const createdAt = document.getElementById('upd-createdAt').value;
+    const deletedAt = document.getElementById('upd-deletedAt').value;
 
     if (!id || !content || !colorCode || xPos === "" || yPos === "" || version === "" || !createdAt) {
-        showResponse(boxId, '⚠️ Action required: Put complete adjustments require matching all inputs: ID, Content, Color Code, Position (X/Y), current Version tracking flag, and Creation Date.', true);
-        return;
-    }
-
-    const createdISO = parseToISOString(createdAt);
-    if (!createdISO) {
-        showResponse(boxId, '⚠️ Date parsing failed: Ensure Creation Date matches MM/DD/YYYY, HH:MM AM/PM structure.', true);
+        showResponse(boxId, '⚠️ Action required: Complete adjustments require filling out all parameters.', true);
         return;
     }
 
@@ -771,13 +826,10 @@ async function putNote() {
         xPos: parseInt(xPos),
         yPos: parseInt(yPos),
         version: parseInt(version),
-        createdAt: createdISO
+        createdAt: new Date(createdAt).toISOString()
     };
     
-    if (deletedAt) {
-        const deletedISO = parseToISOString(deletedAt);
-        if (deletedISO) payload.deletedAt = deletedISO;
-    }
+    if (deletedAt) payload.deletedAt = new Date(deletedAt).toISOString();
 
     try {
         const res = await fetch(API + '/Note/putNote/' + id, {
@@ -807,11 +859,11 @@ async function patchNote() {
     const xPos = document.getElementById('patch-xPos').value.trim();
     const yPos = document.getElementById('patch-yPos').value.trim();
     const version = document.getElementById('patch-version').value.trim();
-    const createdAt = document.getElementById('patch-createdAt').value.trim();
-    const deletedAt = document.getElementById('patch-deletedAt').value.trim();
+    const createdAt = document.getElementById('patch-createdAt').value;
+    const deletedAt = document.getElementById('patch-deletedAt').value;
 
     if (!id || version === "") {
-        showResponse(boxId, '⚠️ Execution halt: Target note ID and current Version reference state variables are both strictly mandatory for synchronization mapping.', true);
+        showResponse(boxId, '⚠️ Execution halt: Target ID and current Version reference fields are strictly mandatory.', true);
         return;
     }
 
@@ -824,18 +876,11 @@ async function patchNote() {
     if (colorCode) payload.colorCode = colorCode;
     if (xPos) payload.xPos = parseInt(xPos);
     if (yPos) payload.yPos = parseInt(yPos);
-    
-    if (createdAt) {
-        const createdISO = parseToISOString(createdAt);
-        if (createdISO) payload.createdAt = createdISO;
-    }
-    if (deletedAt) {
-        const deletedISO = parseToISOString(deletedAt);
-        if (deletedISO) payload.deletedAt = deletedISO;
-    }
+    if (createdAt) payload.createdAt = new Date(createdAt).toISOString();
+    if (deletedAt) payload.deletedAt = new Date(deletedAt).toISOString();
 
     if (Object.keys(payload).length === 2) {
-        showResponse(boxId, '⚠️ Attention: Please fill in at least one selective field attribute to patch change.', true);
+        showResponse(boxId, '⚠️ Attention: Please fill in at least one field to execute a patch change.', true);
         return;
     }
 
@@ -854,14 +899,13 @@ async function patchNote() {
         const data = await res.json();
         showResponse(boxId, 'Selective dynamic property patch success:<br><br>' + noteCard(data), false);
         
-        // Reset Inputs
         document.getElementById('patch-id').value = '';
         document.getElementById('patch-content').value = '';
         document.getElementById('patch-colorCode').value = '';
         document.getElementById('patch-xPos').value = '';
         document.getElementById('patch-yPos').value = '';
         document.getElementById('patch-version').value = '';
-        document.getElementById('patch-createdAt').value = formatTo12HourLocal(new Date());
+        document.getElementById('patch-createdAt').value = getLocalDatetimeString();
         document.getElementById('patch-deletedAt').value = '';
     } catch (e) {
         showResponse(boxId, 'Connectivity dropout error.', true);
@@ -886,7 +930,6 @@ async function doDelete() {
             showResponse(boxId, 'Deletion blocked: server error ' + res.status + ': ' + errorText, true);
             return;
         }
-        const successMessage = await res.text();
         showResponse(boxId, '✅ Sticky Note record wiped success', false);
     } catch (e) {
         showResponse(boxId, 'Connectivity dropout error.', true);
