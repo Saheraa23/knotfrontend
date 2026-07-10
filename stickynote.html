@@ -774,9 +774,25 @@ async function addNote() {
         yPos: parseInt(yPos)
     };
 
-    // FIX: Send the local string format directly or append local timezone context
-    if (createdAt) payload.createdAt = new Date(createdAt).getTime() ? new Date(createdAt - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, -1) : new Date().toISOString();
-    if (deletedAt) payload.deletedAt = new Date(deletedAt - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
+    // Safe parsing for Created At
+    if (createdAt && createdAt.trim() !== "") {
+        const cDate = new Date(createdAt);
+        if (!isNaN(cDate.getTime())) {
+            payload.createdAt = new Date(cDate.getTime() - (cDate.getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
+        } else {
+            payload.createdAt = new Date().toISOString();
+        }
+    } else {
+        payload.createdAt = new Date().toISOString();
+    }
+
+    // Safe parsing for Optional Deleted At field (Fixes the RangeError)
+    if (deletedAt && deletedAt.trim() !== "") {
+        const dDate = new Date(deletedAt);
+        if (!isNaN(dDate.getTime())) {
+            payload.deletedAt = new Date(dDate.getTime() - (dDate.getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
+        }
+    }
 
     try {
         const res = await fetch(API + '/Note/postNote', {
@@ -801,7 +817,7 @@ async function addNote() {
     } catch (e) {
         showResponse(boxId, 'Connectivity dropout error.', true);
     }
-}
+}  
 // ── 4. PUT NOTE ──
 async function putNote() {
     const boxId = 'res-update';
